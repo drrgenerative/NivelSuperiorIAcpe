@@ -19,17 +19,25 @@
 <main class="ingreso" id="ingreso">
   <form class="ingreso__caja" id="ingresoForm">
     <div class="franja" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
-    <div class="ingreso__logos">
-      <img src="assets/img/logo-fundacion-shaia.png" alt="Fundación Shaia" class="marca__shaia">
-      <img src="assets/img/logo-tpa.png" alt="Tecnologías para Aprender" class="marca__tpa">
+    <div class="ingreso__cuerpo">
+      <div class="ingreso__logos">
+        <img src="assets/img/logo-fundacion-shaia.png" alt="Fundación Shaia" class="ingreso__shaia">
+        <img src="assets/img/logo-tpa.png" alt="Tecnologías para Aprender" class="ingreso__tpa">
+      </div>
+      <div class="ingreso__icono" id="ingresoIcono"></div>
+      <h1>Panel de seguimiento</h1>
+      <p class="ingreso__sub">Formación de formadores en IA · respuestas del seguimiento a la transferencia.</p>
+      <div class="ingreso__campo">
+        <label for="clave">Contraseña</label>
+        <div class="ingreso__clave">
+          <input type="password" id="clave" autocomplete="current-password" placeholder="Escribe la contraseña del panel" required>
+          <button type="button" class="ingreso__ver" id="verClave" aria-label="Mostrar contraseña" aria-pressed="false">Mostrar</button>
+        </div>
+      </div>
+      <div class="aviso aviso--error" id="ingresoError" hidden></div>
+      <button class="btn ingreso__entrar" type="submit" id="ingresoBtn">Entrar</button>
+      <p class="ingreso__demo" id="ingresoDemo" hidden>Modo de prueba: la contraseña es <strong>demo</strong>.</p>
     </div>
-    <h1>Panel de seguimiento</h1>
-    <p class="ingreso__sub">Formación de formadores en IA · respuestas del seguimiento a la transferencia.</p>
-    <label for="clave">Contraseña</label>
-    <input type="password" id="clave" autocomplete="current-password" required>
-    <div class="aviso aviso--error" id="ingresoError" hidden></div>
-    <button class="btn" type="submit" id="ingresoBtn">Entrar</button>
-    <p class="ingreso__demo" id="ingresoDemo" hidden>Modo de prueba: la contraseña es <strong>demo</strong>.</p>
   </form>
 </main>
 

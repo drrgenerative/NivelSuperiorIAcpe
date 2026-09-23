@@ -544,6 +544,16 @@
     if (c) ingresar(c, false);
   });
   $("#ingresoDemo").hidden = !API.demo;
+  $("#ingresoIcono").innerHTML = ICONOS.candado;
+  $("#verClave").addEventListener("click", e => {
+    const input = $("#clave");
+    const mostrar = input.type === "password";
+    input.type = mostrar ? "text" : "password";
+    e.currentTarget.textContent = mostrar ? "Ocultar" : "Mostrar";
+    e.currentTarget.setAttribute("aria-pressed", String(mostrar));
+    e.currentTarget.setAttribute("aria-label", mostrar ? "Ocultar contraseña" : "Mostrar contraseña");
+    input.focus();
+  });
   $("#fDepto").addEventListener("change", aplicarFiltros);
   $("#fDesde").addEventListener("change", aplicarFiltros);
   $("#fHasta").addEventListener("change", aplicarFiltros);

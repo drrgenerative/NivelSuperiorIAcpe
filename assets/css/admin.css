@@ -8,19 +8,42 @@ body { font-variant-numeric: lining-nums tabular-nums; }
   background: radial-gradient(90% 70% at 100% 0%, #1B6480 0%, var(--navy) 50%, #082633 100%);
 }
 .ingreso__caja {
-  width: 100%; max-width: 400px; background: var(--card); border-radius: 18px;
-  overflow: hidden; box-shadow: 0 20px 50px rgba(0, 0, 0, .3); display: grid; gap: 10px;
-  padding-bottom: 28px;
+  width: 100%; max-width: 420px; background: var(--card); border-radius: 20px;
+  overflow: hidden; box-shadow: 0 24px 60px rgba(0, 0, 0, .35);
 }
-.ingreso__caja > :not(.franja) { margin: 0 28px; }
-.ingreso__logos { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 22px; margin-bottom: 10px !important; }
-.ingreso__logos .marca__shaia { width: 96px; }
-.ingreso__logos .marca__tpa { width: 150px; }
-.ingreso h1 { font-size: 1.4rem; color: var(--navy); }
-.ingreso__sub { font-size: .88rem; color: var(--muted); margin-bottom: 8px !important; }
-.ingreso label { font-size: .85rem; font-weight: 700; }
-.ingreso .btn { margin-top: 6px !important; }
-.ingreso__demo { font-size: .82rem; color: var(--muted); text-align: center; }
+.ingreso__cuerpo { padding: 28px 32px 32px; display: flex; flex-direction: column; }
+.ingreso__logos {
+  display: flex; align-items: center; justify-content: space-between; gap: 20px;
+  padding-bottom: 22px; margin-bottom: 24px; border-bottom: 1px solid var(--border);
+}
+.ingreso__shaia { width: 92px; }
+.ingreso__tpa { width: 140px; }
+.ingreso__icono {
+  width: 44px; height: 44px; border-radius: 12px; display: grid; place-items: center;
+  background: var(--info-bg); color: var(--cyan-ink); margin-bottom: 14px;
+}
+.ingreso__icono svg { width: 22px; height: 22px; }
+.ingreso h1 { font-size: 1.45rem; line-height: 1.2; color: var(--navy); }
+.ingreso__sub { font-size: .9rem; color: var(--muted); margin-top: 6px; }
+.ingreso__campo { margin-top: 22px; }
+.ingreso__campo label { display: block; font-size: .85rem; font-weight: 700; margin-bottom: 6px; }
+.ingreso__clave { position: relative; }
+.ingreso__clave input { padding-right: 84px; }
+.ingreso__ver {
+  position: absolute; right: 6px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; border-radius: 7px; padding: 6px 10px; cursor: pointer;
+  font-size: .8rem; font-weight: 700; color: var(--cyan-ink);
+}
+.ingreso__ver:hover { background: var(--subtle); }
+.ingreso__ver:focus-visible { outline: none; box-shadow: var(--focus); }
+.ingreso .aviso { margin-top: 14px; }
+.ingreso__entrar { width: 100%; margin-top: 18px; padding: 13px 22px; }
+.ingreso__demo { font-size: .82rem; color: var(--muted); text-align: center; margin-top: 14px; }
+@media (max-width: 420px) {
+  .ingreso__cuerpo { padding: 22px 20px 24px; }
+  .ingreso__shaia { width: 80px; }
+  .ingreso__tpa { width: 120px; }
+}
 
 /* ---------- Barra superior ---------- */
 .barra { background: var(--card); position: sticky; top: 0; z-index: 30; box-shadow: 0 1px 0 var(--border); }
