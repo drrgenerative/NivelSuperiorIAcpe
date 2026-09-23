@@ -24,9 +24,18 @@ const ICONOS = {
   alerta: '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="8.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 5.5v5.5M10 14v.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>',
   reloj: '<svg viewBox="0 0 20 20" aria-hidden="true"><circle cx="10" cy="10" r="7.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M10 6v4.3l2.8 1.7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>',
   lista: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7 5.5h9M7 10h9M7 14.5h9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="3.8" cy="5.5" r="1.2" fill="currentColor"/><circle cx="3.8" cy="10" r="1.2" fill="currentColor"/><circle cx="3.8" cy="14.5" r="1.2" fill="currentColor"/></svg>',
+  externo: '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M11 4h5v5M16 4l-7.5 7.5M14 11.5V15a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1h3.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
   candado: '<svg viewBox="0 0 20 20" aria-hidden="true"><rect x="4" y="9" width="12" height="8.5" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M6.8 9V6.8a3.2 3.2 0 016.4 0V9" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>'
 };
 
 const fmtNum = n => Number(n || 0).toLocaleString("es-CO");
 const fmtFecha = d => d.toLocaleString("es-CO", { day: "2-digit", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
 const fmtFechaCorta = d => d.toLocaleDateString("es-CO", { day: "2-digit", month: "short", year: "numeric" });
+
+// Textos de los extremos de una escala 1–5, con el número al lado.
+function crearAnclas([inicio, fin]) {
+  return crear("div", { class: "anclas", "aria-hidden": "true" }, [
+    crear("span", { class: "ancla" }, [crear("b", { class: "ancla__num" }, "1"), crear("span", {}, inicio)]),
+    crear("span", { class: "ancla ancla--fin" }, [crear("span", {}, fin), crear("b", { class: "ancla__num" }, "5")])
+  ]);
+}

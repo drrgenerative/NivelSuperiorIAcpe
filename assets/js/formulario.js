@@ -4,8 +4,7 @@
   "use strict";
 
   const ACENTOS = ["var(--purple)", "var(--orange)", "var(--cyan)", "var(--navy)"];
-  const ENVIO_KEY = "cpe-seguimiento-enviado-v5";
-  const CORREO_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const ENVIO_KEY = "cpe-seguimiento-enviado-v6";
   const OBLIGATORIA = "Esta pregunta es obligatoria.";
 
   const sel = {};       // selecciones de preguntas "multi" (arreglo) y "escala" (número)
@@ -17,13 +16,9 @@
 
   function dibujar() {
     const cont = $("#preguntas");
-    let acentoSeccion = ACENTOS[0];
     PREGUNTAS.forEach(p => {
       const acento = ACENTOS[(p.n - 1) % ACENTOS.length];
-      if (p.seccion) {
-        acentoSeccion = acento;
-        cont.append(crear("h2", { class: "seccion", style: `--acento:${acentoSeccion}` }, p.seccion));
-      }
+      if (p.seccion) cont.append(crear("h2", { class: "seccion", style: `--acento:${acento}` }, p.seccion));
       const t = tarjeta(p, acento);
       tarjetas[p.n] = t;
       cont.append(t);
@@ -31,8 +26,9 @@
   }
 
   function tarjeta(p, acento) {
+    if (p.tipo === "enlace") return tarjetaEnlace(p);
     const idTitulo = `q${p.n}-titulo`;
-    const unCampo = ["texto", "correo", "lista", "parrafo"].includes(p.tipo);
+    const unCampo = ["texto", "cedula", "parrafo"].includes(p.tipo);
     const titulo = unCampo
       ? crear("label", { class: "q__titulo", id: idTitulo, for: p.campo }, p.titulo)
       : crear("h3", { class: "q__titulo", id: idTitulo }, p.titulo);
@@ -47,17 +43,33 @@
     ]);
   }
 
+  // Invitación con botón a un sitio externo (Padlet). No se valida ni se guarda.
+  function tarjetaEnlace(p) {
+    return crear("section", { class: "q q--enlace", "data-n": p.n, "aria-labelledby": `q${p.n}-titulo` }, [
+      crear("div", { class: "q__cab" }, [
+        crear("span", { class: "q__num", "aria-hidden": "true" }, String(p.n)),
+        crear("h3", { class: "q__titulo", id: `q${p.n}-titulo` }, p.titulo)
+      ]),
+      crear("div", { class: "q__cuerpo" }, [
+        crear("p", { class: "enlace-texto" }, p.texto),
+        botonEnlace(p),
+        crear("p", { class: "q__ayuda enlace-nota" }, "Se abre en una pestaña nueva; este formulario sigue abierto.")
+      ])
+    ]);
+  }
+
+  const botonEnlace = p => crear("a", { class: "btn btn--padlet", href: p.url, target: "_blank", rel: "noopener" },
+    [p.boton, crear("span", { html: ICONOS.externo })]);
+
   function control(p) {
     switch (p.tipo) {
       case "texto":
-      case "correo":
+        return crear("input", { id: p.campo, name: p.campo, type: "text", maxlength: p.max, autocomplete: p.autocomplete, oninput: cambio });
+      case "cedula":
         return crear("input", {
-          id: p.campo, name: p.campo, type: p.tipo === "correo" ? "email" : "text",
-          maxlength: p.max, autocomplete: p.autocomplete, oninput: cambio
+          id: p.campo, name: p.campo, type: "text", inputmode: "numeric", autocomplete: "off", maxlength: 12,
+          class: "input-cedula", oninput: e => { e.target.value = e.target.value.replace(/\D/g, ""); cambio(); }
         });
-      case "lista":
-        return crear("select", { id: p.campo, name: p.campo, onchange: cambio },
-          [crear("option", { value: "" }, "Selecciona…"), ...p.opciones.map(o => crear("option", { value: o }, o))]);
       case "parrafo": {
         const contador = crear("span", { class: "contador" }, `0 / ${p.max}`);
         const area = crear("textarea", {
@@ -68,7 +80,8 @@
       }
       case "escala": return escala(p);
       case "multi": return multi(p);
-      case "numeros": return numeros(p);
+      case "matriz": return matriz(p, false);
+      case "matriz-numeros": return matriz(p, true);
     }
   }
 
@@ -76,7 +89,8 @@
     const grupo = crear("div", { class: "escala", role: "radiogroup", "aria-labelledby": `q${p.n}-titulo` });
     for (let v = 1; v <= 5; v++) {
       const b = crear("button", {
-        type: "button", role: "radio", "aria-checked": "false", "aria-label": `${v} de 5`,
+        type: "button", role: "radio", "aria-checked": "false",
+        "aria-label": v === 1 ? `1: ${p.anclas[0]}` : v === 5 ? `5: ${p.anclas[1]}` : `${v} de 5`,
         onclick: () => {
           sel[p.campo] = v;
           $$("button", grupo).forEach(x => x.setAttribute("aria-checked", String(x === b)));
@@ -85,65 +99,75 @@
       }, String(v));
       grupo.append(b);
     }
-    return [grupo, crear("div", { class: "anclas", "aria-hidden": "true" }, p.anclas.map(a => crear("span", {}, a)))];
+    return [grupo, crearAnclas(p.anclas)];
   }
 
   function multi(p) {
     sel[p.campo] = [];
     const chips = crear("div", { class: "chips" });
+    // Campo "¿Cuál?" que aparece al elegir la opción "Otra".
     const otroInput = p.otro && crear("input", { id: p.otro.campo, type: "text", maxlength: 240, oninput: cambio });
-    const otroWrap = p.otro && crear("div", { class: "sub", hidden: true }, [crear("label", { for: p.otro.campo }, "Otro, ¿cuál?"), otroInput]);
-    const conteoInput = p.conteo && crear("input", {
-      id: p.conteo.campo, type: "number", min: 0, max: p.conteo.max, step: 1, inputmode: "numeric", oninput: cambio
-    });
-    const conteoWrap = p.conteo && crear("div", { class: "sub", hidden: true }, [
-      crear("label", { for: p.conteo.campo }, p.conteo.etiqueta), conteoInput, crear("p", { class: "q__ayuda" }, p.conteo.ayuda)
+    const otroWrap = p.otro && crear("div", { class: "otro-campo", hidden: true }, [
+      crear("label", { for: p.otro.campo }, p.otro.etiqueta), otroInput
     ]);
-
-    const marcar = (b, on) => b.setAttribute("aria-pressed", String(on));
-    const activo = b => b.getAttribute("aria-pressed") === "true";
-
     p.opciones.forEach(o => {
       const b = crear("button", { type: "button", class: "chip", "aria-pressed": "false", "data-valor": o }, [
         crear("span", { class: "chip__check", html: ICONOS.check }), crear("span", {}, o)
       ]);
       b.addEventListener("click", () => {
-        const encender = !activo(b);
-        const todos = $$(".chip", chips);
-        if (o === p.exclusiva && encender) todos.forEach(x => marcar(x, false));
-        else if (encender && p.exclusiva) todos.filter(x => x.dataset.valor === p.exclusiva).forEach(x => marcar(x, false));
-        marcar(b, encender);
-        sel[p.campo] = todos.filter(activo).map(x => x.dataset.valor);
-        actualizarDependientes();
+        b.setAttribute("aria-pressed", String(b.getAttribute("aria-pressed") !== "true"));
+        sel[p.campo] = $$(".chip", chips).filter(x => x.getAttribute("aria-pressed") === "true").map(x => x.dataset.valor);
+        if (p.otro) {
+          const activo = sel[p.campo].includes(p.otro.opcion);
+          otroWrap.hidden = !activo;
+          if (!activo) otroInput.value = "";
+          else if (o === p.otro.opcion) otroInput.focus();
+        }
         cambio();
       });
       chips.append(b);
     });
-
-    function actualizarDependientes() {
-      const s = sel[p.campo];
-      if (p.otro) {
-        const on = s.includes(p.otro.opcion);
-        otroWrap.hidden = !on;
-        if (!on) otroInput.value = "";
-      }
-      if (p.conteo) {
-        const ninguno = s.includes(p.exclusiva);
-        const conActividad = s.length > 0 && !ninguno;
-        conteoWrap.hidden = !conActividad;
-        if (ninguno) conteoInput.value = "0";
-        else if (!conActividad || conteoInput.value === "0") conteoInput.value = "";
-      }
-    }
-
-    return [chips, otroWrap, conteoWrap];
+    return [chips, otroWrap];
   }
 
-  function numeros(p) {
-    return crear("div", { class: "numeros" }, p.campos.map(c => crear("div", { class: "numero" }, [
-      crear("label", { for: c.campo }, c.etiqueta),
-      crear("input", { id: c.campo, type: "number", min: 0, max: p.max, step: 1, inputmode: "numeric", oninput: cambio })
-    ])));
+  // Matriz filas × columnas: casillas de verificación o números.
+  // En pantallas angostas cada fila se muestra como tarjeta (ver formulario.css).
+  function matriz(p, numeros) {
+    const caja = crear("div", { class: "matriz" + (numeros ? " matriz--numeros" : ""), style: `--cols:${p.columnas.length}` });
+    caja.append(crear("div", { class: "matriz__cab", "aria-hidden": "true" },
+      [crear("span"), ...p.columnas.map(c => crear("span", {}, c.texto))]));
+
+    let ninguno = null;
+    const casillas = [];
+    p.filas.forEach(f => {
+      const celdas = p.columnas.map(c => {
+        if (numeros) {
+          return crear("label", { class: "celda celda--num" }, [
+            crear("span", { class: "celda__col" }, c.texto),
+            crear("input", {
+              id: campoCelda(p, f, c), type: "number", min: 0, max: p.max, step: 1, inputmode: "numeric",
+              "aria-label": `${f.texto}, ${c.texto}`, oninput: cambio
+            })
+          ]);
+        }
+        const input = crear("input", {
+          type: "checkbox", "data-fila": f.id, "data-col": c.texto, "aria-label": `${f.texto}, ${c.texto}`,
+          onchange: () => { if (input.checked && ninguno) ninguno.checked = false; cambio(); }
+        });
+        casillas.push(input);
+        return crear("label", { class: "celda" }, [input, crear("span", { class: "casilla", html: ICONOS.check }), crear("span", { class: "celda__col" }, c.texto)]);
+      });
+      caja.append(crear("div", { class: "matriz__fila", role: "group", "aria-label": f.texto }, [
+        crear("div", { class: "matriz__etq" }, f.texto), ...celdas
+      ]));
+    });
+
+    if (!p.ninguno) return caja;
+    ninguno = crear("input", {
+      type: "checkbox", id: campoNinguno(p),
+      onchange: () => { if (ninguno.checked) casillas.forEach(x => { x.checked = false; }); cambio(); }
+    });
+    return [caja, crear("label", { class: "ninguno" }, [ninguno, crear("span", { class: "casilla", html: ICONOS.check }), crear("span", {}, p.ninguno)])];
   }
 
   // ---------- Datos y validación ----------
@@ -153,17 +177,24 @@
 
   function recolectar() {
     const d = {};
-    PREGUNTAS.forEach(p => {
-      if (p.tipo === "multi") {
-        d[p.campo] = sel[p.campo].join(SEPARADOR);
-        if (p.otro) d[p.otro.campo] = valor(p.otro.campo);
-        if (p.conteo) d[p.conteo.campo] = valor(p.conteo.campo);
-      } else if (p.tipo === "escala") {
-        d[p.campo] = sel[p.campo] ? String(sel[p.campo]) : "";
-      } else if (p.tipo === "numeros") {
-        p.campos.forEach(c => { d[c.campo] = valor(c.campo); });
-      } else {
-        d[p.campo] = valor(p.campo);
+    RESPONDIBLES.forEach(p => {
+      const t = tarjetas[p.n];
+      switch (p.tipo) {
+        case "multi":
+          d[p.campo] = sel[p.campo].join(SEPARADOR);
+          if (p.otro) d[p.otro.campo] = valor(p.otro.campo);
+          break;
+        case "escala": d[p.campo] = sel[p.campo] ? String(sel[p.campo]) : ""; break;
+        case "matriz-numeros":
+          p.filas.forEach(f => p.columnas.forEach(c => { d[campoCelda(p, f, c)] = valor(campoCelda(p, f, c)); }));
+          break;
+        case "matriz":
+          p.filas.forEach(f => {
+            d[campoFila(p, f)] = $$(`input[data-fila="${f.id}"]:checked`, t).map(x => x.dataset.col).join(SEPARADOR);
+          });
+          if (p.ninguno) d[campoNinguno(p)] = $("#" + campoNinguno(p)).checked ? "Sí" : "";
+          break;
+        default: d[p.campo] = valor(p.campo);
       }
     });
     return d;
@@ -171,18 +202,21 @@
 
   function error(p, d) {
     switch (p.tipo) {
-      case "correo":
-        if (!d.correo) return OBLIGATORIA;
-        return CORREO_RE.test(d.correo) ? "" : "Escribe un correo válido, por ejemplo nombre@dominio.com.";
-      case "lista": return d[p.campo] ? "" : "Selecciona una opción.";
+      case "cedula":
+        if (!d.cedula) return OBLIGATORIA;
+        return /^\d{5,12}$/.test(d.cedula) ? "" : "Escribe un número de cédula válido (entre 5 y 12 dígitos).";
       case "escala": return d[p.campo] ? "" : "Elige un valor de 1 a 5.";
-      case "numeros":
-        return p.campos.every(c => esEntero(d[c.campo], p.max)) ? "" : "Registra un número entero en cada nivel (0 si no aplica).";
       case "multi":
         if (!sel[p.campo].length) return "Selecciona al menos una opción.";
-        if (p.otro && sel[p.campo].includes(p.otro.opcion) && !d[p.otro.campo]) return "Escribe cuál es la otra opción.";
-        if (p.conteo && !esEntero(d[p.conteo.campo], p.conteo.max)) return "Indica aproximadamente cuántos estudiantes participaron.";
+        if (p.otro && sel[p.campo].includes(p.otro.opcion) && !d[p.otro.campo]) return `Escribe cuál es la opción «${p.otro.opcion}».`;
         return "";
+      case "matriz": {
+        const alguna = p.filas.some(f => d[campoFila(p, f)]) || (p.ninguno && d[campoNinguno(p)]);
+        return alguna ? "" : `Marca al menos una casilla, o «${p.ninguno}».`;
+      }
+      case "matriz-numeros":
+        return p.filas.every(f => p.columnas.every(c => esEntero(d[campoCelda(p, f, c)], p.max)))
+          ? "" : "Registra un número entero en cada casilla (0 si no aplica).";
       default: return d[p.campo] ? "" : OBLIGATORIA;
     }
   }
@@ -197,13 +231,13 @@
   function cambio() {
     const d = recolectar();
     let completas = 0;
-    PREGUNTAS.forEach(p => {
+    RESPONDIBLES.forEach(p => {
       const msg = error(p, d);
       if (!msg) completas++;
       tarjetas[p.n].classList.toggle("q--ok", !msg);
       if (intentoEnvio) pintarError(p, msg);
     });
-    const total = PREGUNTAS.length;
+    const total = RESPONDIBLES.length;
     $("#progresoRelleno").style.width = `${(completas / total) * 100}%`;
     $("#progresoTexto").textContent = `${completas} de ${total}`;
     $("#progreso [role=progressbar]").setAttribute("aria-valuenow", completas);
@@ -237,7 +271,7 @@
     if (enviando) return;
     intentoEnvio = true;
     const d = recolectar();
-    const fallas = PREGUNTAS.filter(p => error(p, d));
+    const fallas = RESPONDIBLES.filter(p => error(p, d));
     cambio();
     if (fallas.length) {
       mostrarAviso(fallas.length === 1
@@ -257,10 +291,10 @@
         try { sessionStorage.setItem(ENVIO_KEY, "1"); } catch (e) { }
         mostrarGracias();
       } else if (r.error === "duplicado") {
-        const pCorreo = PREGUNTAS.find(p => p.campo === "correo");
-        mostrarAviso(`Ya hay un seguimiento registrado con el correo ${d.correo}. Cada persona responde una sola vez; si necesitas corregir algo, escribe al equipo del programa.`);
-        pintarError(pCorreo, "Este correo ya tiene un seguimiento registrado.");
-        irA(pCorreo);
+        const pCedula = PREGUNTAS.find(p => p.tipo === "cedula");
+        mostrarAviso(`Ya hay un seguimiento registrado con la cédula ${d.cedula}. Cada persona responde una sola vez; si necesitas corregir algo, escribe al equipo del programa.`);
+        pintarError(pCedula, "Esta cédula ya tiene un seguimiento registrado.");
+        irA(pCedula);
       } else {
         mostrarAviso("No pudimos guardar tu respuesta. Revisa los datos e intenta de nuevo.");
       }
@@ -278,14 +312,21 @@
     const g = $("#gracias");
     g.hidden = false;
     g.focus();
-    window.scrollTo({ top: 0 });
+    g.scrollIntoView({ block: "start" });
   }
 
   // ---------- Inicio ----------
 
   $("#metaTiempo").prepend(crear("span", { html: ICONOS.reloj }));
-  $("#metaPreguntas").prepend(crear("span", { html: ICONOS.lista }));
+  $("#metaPreguntas").replaceChildren(crear("span", { html: ICONOS.lista }), `${RESPONDIBLES.length} preguntas · todas obligatorias`);
+  $("#progreso [role=progressbar]").setAttribute("aria-valuemax", RESPONDIBLES.length);
   $("#graciasIcono").innerHTML = ICONOS.check;
+  if (PADLET) {
+    $("#graciasPadlet").replaceChildren(
+      crear("p", {}, [crear("strong", {}, "¿Ya compartiste tu experiencia? "), "Publica tus respuestas, ejemplos o fotos en el Padlet del taller."]),
+      botonEnlace(PADLET));
+    $("#graciasPadlet").hidden = false;
+  }
 
   if (API.demo) {
     const a = $("#avisoDemo");

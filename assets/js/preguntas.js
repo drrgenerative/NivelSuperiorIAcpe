@@ -1,93 +1,146 @@
 // Definición única del cuestionario. El formulario se dibuja a partir de aquí y
-// el panel la usa para resumir y exportar. Para cambiar una pregunta u opción,
-// se edita solo este archivo (y, si cambia un `campo`, también Code.gs).
+// el panel la usa para resumir y exportar. Para cambiar una pregunta u opción se
+// edita solo este archivo: el backend crea solo las columnas nuevas en la hoja.
+// Ojo: cambiar un `campo` o un `id` existente crea una columna nueva (la vieja
+// queda en la hoja con los datos anteriores).
 
-const DEPARTAMENTOS = ["Amazonas", "Antioquia", "Arauca", "Atlántico", "Bogotá, D. C.", "Bolívar", "Boyacá", "Caldas", "Caquetá", "Casanare", "Cauca", "Cesar", "Chocó", "Córdoba", "Cundinamarca", "Guainía", "Guaviare", "Huila", "La Guajira", "Magdalena", "Meta", "Nariño", "Norte de Santander", "Putumayo", "Quindío", "Risaralda", "San Andrés y Providencia", "Santander", "Sucre", "Tolima", "Valle del Cauca", "Vaupés", "Vichada"];
+const SEPARADOR = " | "; // cómo se guardan varias selecciones en una celda
 
-const SEPARADOR = " | "; // cómo se guardan las respuestas de selección múltiple
+const ROLES = [
+  { id: "directivos", texto: "Directivos" },
+  { id: "docentes", texto: "Docentes" },
+  { id: "estudiantes", texto: "Estudiantes" }
+];
 
 const PREGUNTAS = [
-  { n: 1, seccion: "Identificación", tipo: "texto", campo: "nombre", titulo: "Nombre completo", max: 120, autocomplete: "name" },
-  { n: 2, tipo: "correo", campo: "correo", titulo: "Correo usado en el registro", max: 160, autocomplete: "email" },
-  { n: 3, tipo: "lista", campo: "departamento", titulo: "Departamento", opciones: DEPARTAMENTOS },
+  { n: 1, seccion: "Identificación", tipo: "texto", campo: "nombre", corto: "Nombre completo", titulo: "Nombre completo", max: 120, autocomplete: "name" },
+  { n: 2, tipo: "cedula", campo: "cedula", corto: "Número de cédula", titulo: "Número de cédula", ayuda: "Solo números, sin puntos ni espacios." },
 
   {
-    n: 4, seccion: "Aplicación", tipo: "escala", campo: "transferencia",
+    n: 3, seccion: "Aplicación", tipo: "escala", campo: "transferencia", corto: "Aplicación de lo aprendido (1-5)",
     titulo: "Desde el taller, ¿cuánto has logrado aplicar lo aprendido?",
     anclas: ["Todavía no lo he aplicado", "Lo he incorporado en mi trabajo"]
   },
 
   {
-    n: 5, seccion: "Formación y acompañamiento a directivos y docentes", tipo: "multi", campo: "contenidos_cpe",
-    titulo: "¿Qué contenidos de IA creados por Computadores para Educar has utilizado para formar o acompañar a otras/os directivos o docentes?",
-    ayuda: "Puedes seleccionar varios.",
-    opciones: ["Máquinas que aprenden", "IA ética y uso responsable", "Detrás del chat", "Proyecto final", "Ingeniería de prompts pedagógicos", "Análisis crítico y ética de la IA", "IA aplicada al currículo", "Arquitecturas de IA contextualizada", "Multimodalidad e inclusión educativa", "Gobernanza, liderazgo e integración curricular", "Otro", "Todavía ninguno"],
-    exclusiva: "Todavía ninguno",
-    otro: { opcion: "Otro", campo: "contenido_cpe_otro" }
+    n: 4, seccion: "Uso de los contenidos de CPE", tipo: "matriz", campo: "contenidos_cpe", corto: "Contenidos CPE",
+    titulo: "¿Qué contenidos de IA creados por Computadores para Educar has utilizado para formar o acompañar a directivos, docentes o estudiantes?",
+    ayuda: "En cada contenido, marca con quién lo has utilizado. Puedes marcar varias columnas por fila.",
+    columnas: ROLES,
+    filas: [
+      { id: "maquinas", texto: "Máquinas que aprenden" },
+      { id: "etica_uso", texto: "IA ética y uso responsable" },
+      { id: "detras_chat", texto: "Detrás del chat" },
+      { id: "proyecto_final", texto: "Proyecto final" },
+      { id: "prompts", texto: "Ingeniería de prompts pedagógicos" },
+      { id: "analisis_critico", texto: "Análisis crítico y ética de la IA" },
+      { id: "curriculo", texto: "IA aplicada al currículo" },
+      { id: "arquitecturas", texto: "Arquitecturas de IA contextualizada" },
+      { id: "multimodalidad", texto: "Multimodalidad e inclusión educativa" },
+      { id: "gobernanza", texto: "Gobernanza, liderazgo e integración curricular" }
+    ],
+    ninguno: "Todavía no he utilizado ninguno de estos contenidos"
   },
 
   {
-    n: 6, seccion: "Transferencia de la formación avanzada", tipo: "multi", campo: "practicas_avanzadas",
-    titulo: "¿Qué componentes de esta formación avanzada has puesto en práctica?",
-    ayuda: "Puedes seleccionar varios.",
-    opciones: ["Práctica de recuperación o aprendizaje activo", "Uso de marcos de competencias de IA", "Diseño de actividades con agencia epistémica", "Configuración y prueba de un asistente con instrucciones y base de conocimiento", "Workspace con contexto persistente y relevo entre chats", "Todavía ninguna"],
-    exclusiva: "Todavía ninguna"
+    n: 5, seccion: "Transferencia de la formación superior", tipo: "matriz", campo: "practicas_avanzadas", corto: "Componentes avanzados",
+    titulo: "¿Qué componentes de esta formación superior has puesto en práctica y con quién?",
+    ayuda: "En cada componente, marca con quién lo has puesto en práctica. Puedes marcar varias columnas por fila.",
+    columnas: ROLES,
+    filas: [
+      { id: "recuperacion", texto: "Práctica de recuperación o aprendizaje activo" },
+      { id: "marcos", texto: "Uso de marcos de competencias de IA" },
+      { id: "agencia", texto: "Diseño de actividades con agencia epistémica" },
+      { id: "asistente", texto: "Configuración y prueba de un asistente con instrucciones y base de conocimiento" },
+      { id: "workspace", texto: "Workspace con contexto persistente y relevo entre chats" }
+    ],
+    ninguno: "Todavía no he puesto en práctica ninguno de estos componentes"
   },
 
   {
-    n: 7, seccion: "Alcance", tipo: "numeros",
-    titulo: "Aproximadamente ¿Cuántos directivos o docentes has formado o acompañado en el uso de IA, desde el nivel superior?",
-    ayuda: "Indica el número correspondiente a cada nivel. Registra 0 si no has realizado formación en alguno. Para evitar dobles conteos, ubica cada directivo o docente únicamente en el nivel más avanzado alcanzado.",
-    max: 99999,
-    campos: [
-      { campo: "personas_basico", etiqueta: "Nivel básico" },
-      { campo: "personas_intermedio", etiqueta: "Nivel intermedio" },
-      { campo: "personas_avanzado", etiqueta: "Nivel avanzado" }
-    ]
+    n: 6, seccion: "Alcance", tipo: "matriz-numeros", campo: "personas", corto: "Personas formadas",
+    titulo: "Aproximadamente, ¿cuántas personas has formado o acompañado en el uso de IA desde la formación de nivel superior?",
+    ayuda: "Indica el número por nivel y por rol. Registra cero (0) si no aplica. Para evitar dobles conteos, registra a cada persona una sola vez, en el nivel más avanzado que alcanzó. Por ejemplo: Si formaste a la profe Ana en nivel básico y luego en nivel intermedio, solo cuéntala en el nivel intermedio.",
+    columnas: ROLES,
+    filas: [
+      { id: "basico", texto: "Nivel básico" },
+      { id: "intermedio", texto: "Nivel intermedio" },
+      { id: "avanzado", texto: "Nivel avanzado" }
+    ],
+    max: 99999
   },
 
   {
-    n: 8, seccion: "Trabajo directo con estudiantes", tipo: "multi", campo: "trabajo_estudiantes",
-    titulo: "Desde la formación de nivel superior, ¿has desarrollado actividades o talleres sobre IA directamente con estudiantes?",
-    ayuda: "Puedes seleccionar varias opciones.",
-    opciones: ["Sí, en actividades de aula con mis estudiantes", "Sí, en talleres para estudiantes de mi institución educativa", "Sí, en talleres para estudiantes de otras instituciones educativas", "Otro", "Todavía no"],
-    exclusiva: "Todavía no",
-    otro: { opcion: "Otro", campo: "trabajo_estudiantes_otro" },
-    conteo: {
-      campo: "estudiantes_alcanzados", max: 999999,
-      etiqueta: "Aproximadamente, ¿cuántos estudiantes han participado en total?",
-      ayuda: "Cuenta cada estudiante una sola vez."
-    }
+    n: 7, seccion: "Actividades y talleres", tipo: "matriz", campo: "actividades", corto: "Actividades y talleres",
+    titulo: "Desde la formación de nivel superior, ¿qué actividades o talleres sobre IA has desarrollado y con quién?",
+    ayuda: "En cada tipo de actividad, marca con quién la has desarrollado. Puedes marcar varias columnas por fila.",
+    columnas: ROLES,
+    filas: [
+      { id: "aula", texto: "Actividades de aula con IA" },
+      { id: "talleres_propia", texto: "Talleres en mi institución educativa" },
+      { id: "talleres_otras", texto: "Talleres en otras instituciones educativas" },
+      { id: "mentoria", texto: "Acompañamiento o mentoría individual" },
+      { id: "presentacion", texto: "Presentación en espacio institucional (consejo académico, comité, reunión de área, equipo docente)" },
+      { id: "materiales", texto: "Creación y difusión de materiales o recursos (guías, tutoriales, bancos de prompts)" },
+      { id: "proyectos", texto: "Proyectos o experiencias institucionales con IA" },
+      { id: "comunidades", texto: "Intercambio de experiencias o comunidades de aprendizaje sobre IA" }
+    ],
+    ninguno: "Todavía no he desarrollado actividades ni talleres sobre IA"
   },
 
   {
-    n: 9, seccion: "Continuidad", tipo: "multi", campo: "barreras",
+    n: 8, seccion: "Barreras y apoyo", tipo: "multi", campo: "barreras", corto: "Barreras",
     titulo: "¿Qué barreras has encontrado?",
     ayuda: "Puedes seleccionar varias.",
-    opciones: ["Tiempo", "Conectividad o equipos", "Acceso a herramientas o licencias", "Políticas o autorizaciones institucionales", "Protección de datos", "Falta de materiales o acompañamiento", "Resistencia o baja participación", "Todavía no he tenido oportunidad", "Otra"]
+    opciones: ["Tiempo", "Conectividad o equipos", "Acceso a herramientas o licencias", "Políticas o autorizaciones institucionales", "Protección de datos", "Falta de materiales o acompañamiento", "Resistencia o baja participación", "Todavía no he tenido oportunidad", "Otra"],
+    otro: { opcion: "Otra", campo: "barreras_otra", etiqueta: "¿Cuál otra barrera has encontrado?" }
   },
   {
-    n: 10, tipo: "parrafo", campo: "apoyo", max: 1000,
-    titulo: "¿Qué apoyo te ayudaría a avanzar en el acompañamiento de tu comunidad para que sea más competente en el uso de la IA?"
+    n: 9, tipo: "parrafo", campo: "apoyo", corto: "Apoyo que ayudaría", max: 1000,
+    titulo: "¿Qué apoyos te ayudarían a avanzar en el acompañamiento de tu comunidad para que sea más competente en el uso de la IA?"
+  },
+
+  // Tarjeta informativa: no es pregunta, no es obligatoria y no se guarda.
+  {
+    n: 10, seccion: "Comparte tu experiencia", tipo: "enlace",
+    titulo: "Comparte tus experiencias en el Padlet",
+    texto: "Te invitamos a compartir en el Padlet lo que has hecho después del taller: tus ejemplos, recursos o fotos de las actividades. Así otros formadores pueden conocer tu experiencia y aprender de ella.",
+    url: "https://padlet.com/nando24/taller-ia-nivel-superior-formador-de-formadores-mri6rkz61qiy2cb3",
+    boton: "Abrir el Padlet"
   }
 ];
 
-// Columnas de la hoja y del Excel exportado, en orden.
-const COLUMNAS = [
-  { campo: "fecha", etiqueta: "Fecha de envío", ancho: 17, tipo: "fecha" },
-  { campo: "nombre", etiqueta: "Nombre completo", ancho: 28 },
-  { campo: "correo", etiqueta: "Correo", ancho: 30 },
-  { campo: "departamento", etiqueta: "Departamento", ancho: 18 },
-  { campo: "transferencia", etiqueta: "Aplicación de lo aprendido (1-5)", ancho: 14, tipo: "numero" },
-  { campo: "contenidos_cpe", etiqueta: "Contenidos CPE utilizados", ancho: 50, tipo: "multi" },
-  { campo: "contenido_cpe_otro", etiqueta: "Contenidos CPE: otro", ancho: 24 },
-  { campo: "practicas_avanzadas", etiqueta: "Componentes avanzados aplicados", ancho: 50, tipo: "multi" },
-  { campo: "personas_basico", etiqueta: "Formados nivel básico", ancho: 12, tipo: "numero" },
-  { campo: "personas_intermedio", etiqueta: "Formados nivel intermedio", ancho: 12, tipo: "numero" },
-  { campo: "personas_avanzado", etiqueta: "Formados nivel avanzado", ancho: 12, tipo: "numero" },
-  { campo: "trabajo_estudiantes", etiqueta: "Trabajo con estudiantes", ancho: 50, tipo: "multi" },
-  { campo: "trabajo_estudiantes_otro", etiqueta: "Trabajo con estudiantes: otro", ancho: 24 },
-  { campo: "estudiantes_alcanzados", etiqueta: "Estudiantes alcanzados", ancho: 12, tipo: "numero" },
-  { campo: "barreras", etiqueta: "Barreras", ancho: 44, tipo: "multi" },
-  { campo: "apoyo", etiqueta: "Apoyo que ayudaría", ancho: 60 }
-];
+// Solo lo que se responde (excluye tarjetas informativas como la del Padlet).
+const RESPONDIBLES = PREGUNTAS.filter(p => p.tipo !== "enlace");
+const PADLET = PREGUNTAS.find(p => p.tipo === "enlace");
+
+// Nombres de columna de las matrices.
+const campoFila = (p, fila) => `${p.campo}__${fila.id}`;
+const campoCelda = (p, fila, col) => `${p.campo}__${fila.id}__${col.id}`;
+const campoNinguno = p => `${p.campo}__ninguno`;
+
+// Columnas de la hoja y del Excel, en orden (se derivan de PREGUNTAS).
+const COLUMNAS = (() => {
+  const cols = [{ campo: "fecha", etiqueta: "Fecha de envío", ancho: 17, tipo: "fecha" }];
+  RESPONDIBLES.forEach(p => {
+    const pre = p.n > 2 ? `${p.n}. ${p.corto}` : p.corto;
+    switch (p.tipo) {
+      case "matriz":
+        p.filas.forEach(f => cols.push({ campo: campoFila(p, f), etiqueta: `${pre} · ${f.texto}`, ancho: 26, tipo: "multi" }));
+        cols.push({ campo: campoNinguno(p), etiqueta: `${pre} · Ninguno todavía`, ancho: 14 });
+        break;
+      case "matriz-numeros":
+        p.filas.forEach(f => p.columnas.forEach(c =>
+          cols.push({ campo: campoCelda(p, f, c), etiqueta: `${pre} · ${f.texto} · ${c.texto}`, ancho: 14, tipo: "numero" })));
+        break;
+      case "escala": cols.push({ campo: p.campo, etiqueta: pre, ancho: 14, tipo: "numero" }); break;
+      case "multi":
+        cols.push({ campo: p.campo, etiqueta: pre, ancho: 44, tipo: "multi" });
+        if (p.otro) cols.push({ campo: p.otro.campo, etiqueta: `${pre} · ${p.otro.opcion} (cuál)`, ancho: 30 });
+        break;
+      case "parrafo": cols.push({ campo: p.campo, etiqueta: pre, ancho: 60 }); break;
+      default: cols.push({ campo: p.campo, etiqueta: pre, ancho: p.tipo === "cedula" ? 16 : 28 });
+    }
+  });
+  return cols;
+})();

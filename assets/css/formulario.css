@@ -102,8 +102,6 @@
 .escala button:hover { border-color: var(--navy); background: var(--subtle); }
 .escala button:focus-visible { outline: none; box-shadow: var(--focus); }
 .escala button[aria-checked=true] { background: var(--navy); border-color: var(--navy); color: #fff; transform: translateY(-1px); box-shadow: 0 4px 10px rgba(12, 53, 69, .2); }
-.anclas { display: flex; justify-content: space-between; gap: 16px; margin-top: 8px; font-size: .8rem; color: var(--muted); }
-.anclas span:last-child { text-align: right; }
 
 /* Chips de selección múltiple */
 .chips { display: flex; flex-wrap: wrap; gap: 8px; }
@@ -124,15 +122,7 @@
 .chip[aria-pressed=true] { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 9%, white); font-weight: 600; }
 .chip[aria-pressed=true] .chip__check { background: var(--acento); border-color: var(--acento); color: #fff; }
 
-.sub { margin-top: 14px; padding: 14px; border-radius: 10px; background: var(--subtle); border: 1px dashed var(--border-2); }
-.sub label { display: block; font-size: .88rem; font-weight: 600; margin-bottom: 7px; }
-.sub .q__ayuda { margin: 7px 0 0; }
-.sub input[type=number] { max-width: 220px; }
 
-/* Números por nivel */
-.numeros { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-.numero { padding: 12px; border-radius: 10px; background: var(--subtle); }
-.numero label { display: block; font-size: .85rem; font-weight: 600; margin-bottom: 6px; }
 
 .parrafo { position: relative; }
 .contador { display: block; text-align: right; font-size: .76rem; color: var(--muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
@@ -172,6 +162,88 @@
   .q { padding: 18px 16px; }
   .q__ayuda, .q__cuerpo, .q__error { margin-left: 0; }
   .escala { gap: 6px; }
-  .numeros { grid-template-columns: 1fr; }
   .envio .btn { width: 100%; }
 }
+
+.input-cedula { max-width: 280px; letter-spacing: .04em; font-variant-numeric: tabular-nums; }
+
+/* ---------- Matrices (filas × roles) ---------- */
+.matriz { border: 1px solid var(--border); border-radius: 12px; overflow: hidden; }
+.matriz__cab, .matriz__fila {
+  display: grid; grid-template-columns: minmax(0, 1fr) repeat(var(--cols), 104px); align-items: center;
+}
+.matriz__cab { background: var(--navy); color: #fff; font-size: .82rem; font-weight: 700; }
+.matriz__cab span { padding: 10px 6px; text-align: center; }
+.matriz__fila { border-top: 1px solid var(--border); transition: background .12s; }
+.matriz__fila:nth-child(odd) { background: var(--subtle); }
+.matriz__fila:hover { background: color-mix(in srgb, var(--acento) 6%, white); }
+.matriz__etq { padding: 12px 14px; font-size: .92rem; line-height: 1.35; }
+
+.celda { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 6px; cursor: pointer; height: 100%; position: relative; }
+.celda input[type=checkbox], .ninguno input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.casilla {
+  flex: none; width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center;
+  border: 2px solid var(--border-2); background: var(--card); color: transparent; transition: all .12s;
+}
+.casilla svg { width: 15px; height: 15px; }
+.celda:hover .casilla, .ninguno:hover .casilla { border-color: var(--acento); }
+input:checked + .casilla { background: var(--acento); border-color: var(--acento); color: #fff; }
+input:focus-visible + .casilla { box-shadow: var(--focus); }
+.celda__col {
+  position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap;
+}
+.celda--num input { width: 84px; padding: 8px 6px; text-align: center; }
+
+.ninguno {
+  display: inline-flex; align-items: center; gap: 10px; margin-top: 12px; position: relative;
+  padding: 10px 16px 10px 12px; border: 1.5px dashed var(--border-2); border-radius: 10px;
+  font-size: .9rem; cursor: pointer; transition: all .12s;
+}
+.ninguno:has(input:checked) { border-style: solid; border-color: var(--acento); background: color-mix(in srgb, var(--acento) 8%, white); font-weight: 600; }
+
+/* En celular cada fila se vuelve una tarjeta con los roles como botones. */
+@media (max-width: 640px) {
+  .matriz { border: none; border-radius: 0; overflow: visible; display: grid; gap: 10px; }
+  .matriz__cab { display: none; }
+  .matriz__fila, .matriz__fila:nth-child(odd) {
+    grid-template-columns: repeat(var(--cols), minmax(0, 1fr)); gap: 6px;
+    border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--card);
+  }
+  .matriz__etq { grid-column: 1 / -1; padding: 0 0 4px; font-weight: 600; }
+  .celda {
+    flex-direction: column; gap: 4px; padding: 8px 4px; min-width: 0;
+    border: 1.5px solid var(--border-2); border-radius: 9px;
+  }
+  .celda:has(input:checked) { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 8%, white); }
+  .casilla { width: 20px; height: 20px; border-radius: 5px; }
+  .casilla svg { width: 12px; height: 12px; }
+  .celda__col { position: static; width: auto; height: auto; overflow: visible; clip: auto; font-size: .78rem; font-weight: 600; max-width: 100%; }
+  .celda--num { flex-direction: column; align-items: stretch; gap: 4px; border: none; padding: 0; }
+  .celda--num input { width: 100%; }
+  .ninguno { display: flex; }
+  .anclas { gap: 10px; }
+  .ancla { font-size: .8rem; }
+}
+
+/* Campo "¿Cuál?" de la opción Otra */
+.otro-campo { margin-top: 14px; padding: 14px; border-radius: 10px; background: var(--subtle); border: 1px dashed var(--border-2); }
+.otro-campo label { display: block; font-size: .88rem; font-weight: 700; margin-bottom: 7px; }
+
+/* Invitación al Padlet */
+.q--enlace {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--yellow) 18%, white) 0%, #fff 60%);
+  border-color: color-mix(in srgb, var(--yellow) 55%, white);
+}
+.q--enlace::before { background: var(--yellow); }
+.q--enlace .q__num { background: var(--yellow); color: var(--navy); }
+.enlace-texto { font-size: .95rem; color: var(--ink-2); max-width: 62ch; }
+.btn--padlet { margin-top: 14px; text-decoration: none; background: var(--navy); }
+.btn--padlet:hover { background: var(--navy-2); }
+.btn--padlet svg { width: 16px; height: 16px; }
+.enlace-nota { margin: 8px 0 0; }
+
+.gracias__padlet {
+  margin: 24px auto 0; max-width: 520px; padding: 18px 20px; border-radius: 14px;
+  background: color-mix(in srgb, var(--yellow) 16%, white); border: 1px solid color-mix(in srgb, var(--yellow) 50%, white);
+}
+.gracias__padlet p { margin: 0; font-size: .95rem; color: var(--ink-2); }

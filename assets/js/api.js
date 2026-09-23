@@ -4,7 +4,7 @@
 const API = (() => {
   const url = ((window.CONFIG && window.CONFIG.SCRIPT_URL) || "").trim();
   const demo = !url;
-  const DEMO_KEY = "cpe-seguimiento-demo-v1";
+  const DEMO_KEY = "cpe-seguimiento-demo-v2";
   const DEMO_CLAVE = "demo";
   const pausa = ms => new Promise(r => setTimeout(r, ms));
 
@@ -25,12 +25,13 @@ const API = (() => {
   const guardarDemo = filas => { try { localStorage.setItem(DEMO_KEY, JSON.stringify(filas)); } catch (e) { } };
 
   async function enviar(campos) {
-    if (!demo) return post({ tipo: "seguimiento", ...campos });
+    // _orden le dice al backend qué columnas debe tener la hoja y en qué orden.
+    const orden = COLUMNAS.map(c => c.campo).filter(c => c !== "fecha").join(",");
+    if (!demo) return post({ tipo: "seguimiento", _orden: orden, ...campos });
     await pausa(500);
     const filas = leerDemo();
-    const correo = campos.correo.toLowerCase();
-    if (filas.some(f => String(f.correo).toLowerCase() === correo)) return { ok: false, error: "duplicado" };
-    filas.push({ fecha: new Date().toISOString(), ...campos, correo });
+    if (filas.some(f => String(f.cedula) === campos.cedula)) return { ok: false, error: "duplicado" };
+    filas.push({ fecha: new Date().toISOString(), ...campos });
     guardarDemo(filas);
     return { ok: true };
   }
@@ -44,41 +45,39 @@ const API = (() => {
   // Solo modo de prueba: datos ficticios para ver el panel con contenido.
   function cargarEjemplos(cantidad = 30) {
     const azar = arr => arr[Math.floor(Math.random() * arr.length)];
+    const entre = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
     const nombres = ["Ana", "Luis", "Marta", "Jorge", "Paola", "Andrés", "Camila", "Diego", "Laura", "Felipe", "Sofía", "Carlos", "Valentina", "Julián", "Diana"];
     const apellidos = ["Gómez", "Rodríguez", "Martínez", "López", "Hernández", "Díaz", "Moreno", "Rojas", "Vargas", "Castro", "Ortiz", "Ramírez"];
     const apoyos = ["Más materiales listos para usar en aula.", "Acompañamiento en sitio durante las primeras sesiones.", "Tiempo institucional asignado para formar a colegas.", "Acceso a licencias de herramientas de IA.", "Una comunidad de práctica entre formadores.", "Guías para hablar de ética y datos con directivos."];
-    const multi = p => {
-      if (p.exclusiva && Math.random() < 0.12) return p.exclusiva;
-      const opciones = p.opciones.filter(o => o !== p.exclusiva);
-      const k = 1 + Math.floor(Math.random() * 3);
-      return [...opciones].sort(() => Math.random() - 0.5).slice(0, k).sort((a, b) => opciones.indexOf(a) - opciones.indexOf(b)).join(SEPARADOR);
-    };
-    const P = Object.fromEntries(PREGUNTAS.map(p => [p.campo, p]));
     const filas = leerDemo();
     const ahora = Date.now();
     for (let i = 0; i < cantidad; i++) {
-      const nombre = `${azar(nombres)} ${azar(apellidos)} ${azar(apellidos)}`;
-      const correo = `${nombre.split(" ")[0].toLowerCase()}.${i}${Math.floor(Math.random() * 900 + 100)}@ejemplo.edu.co`
-        .normalize("NFD").replace(/[̀-ͯ]/g, "");
-      const trabajo = multi(P.trabajo_estudiantes);
-      const contenidos = multi(P.contenidos_cpe);
-      filas.push({
+      const f = {
         fecha: new Date(ahora - Math.random() * 40 * 864e5).toISOString(),
-        nombre, correo,
-        departamento: azar(DEPARTAMENTOS.slice(0, 20)),
-        transferencia: 1 + Math.floor(Math.random() * 5),
-        contenidos_cpe: contenidos,
-        contenido_cpe_otro: contenidos.includes("Otro") ? "Guía propia de la secretaría" : "",
-        practicas_avanzadas: multi(P.practicas_avanzadas),
-        personas_basico: Math.floor(Math.random() * 40),
-        personas_intermedio: Math.floor(Math.random() * 20),
-        personas_avanzado: Math.floor(Math.random() * 8),
-        trabajo_estudiantes: trabajo,
-        trabajo_estudiantes_otro: trabajo.includes("Otro") ? "Semillero de robótica" : "",
-        estudiantes_alcanzados: trabajo === "Todavía no" ? 0 : Math.floor(Math.random() * 180),
-        barreras: multi(P.barreras),
-        apoyo: azar(apoyos)
+        nombre: `${azar(nombres)} ${azar(apellidos)} ${azar(apellidos)}`,
+        cedula: String(entre(10000000, 1099999999))
+      };
+      RESPONDIBLES.forEach(p => {
+        if (p.tipo === "escala") f[p.campo] = entre(1, 5);
+        else if (p.tipo === "multi") {
+          f[p.campo] = p.opciones.filter(() => Math.random() < 0.3).join(SEPARADOR) || p.opciones[0];
+          if (p.otro) f[p.otro.campo] = f[p.campo].includes(p.otro.opcion) ? azar(["Rotación de docentes", "Carga administrativa", "Falta de energía eléctrica"]) : "";
+        }
+        else if (p.tipo === "parrafo") f[p.campo] = azar(apoyos);
+        else if (p.tipo === "matriz-numeros") {
+          p.filas.forEach((fi, k) => p.columnas.forEach(c => {
+            const tope = { directivos: 6, docentes: 30, estudiantes: 120 }[c.id] || 10;
+            f[campoCelda(p, fi, c)] = Math.random() < 0.3 ? 0 : entre(0, Math.round(tope / (k + 1)));
+          }));
+        } else if (p.tipo === "matriz") {
+          const ninguno = Math.random() < 0.12;
+          f[campoNinguno(p)] = ninguno ? "Sí" : "";
+          p.filas.forEach(fi => {
+            f[campoFila(p, fi)] = ninguno ? "" : p.columnas.filter(() => Math.random() < 0.35).map(c => c.texto).join(SEPARADOR);
+          });
+        }
       });
+      filas.push(f);
     }
     guardarDemo(filas);
   }

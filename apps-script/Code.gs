@@ -7,28 +7,15 @@
  *
  * Contraseña del panel: Configuración del proyecto > Propiedades de la
  * secuencia de comandos > ADMIN_PASSWORD.
+ *
+ * Las columnas las define el formulario (assets/js/preguntas.js): en cada envío
+ * llega la lista `_orden` y aquí se agregan a la hoja las que aún no existan.
+ * Por eso cambiar preguntas NO requiere modificar este archivo.
  */
 
 const HOJA = 'Respuestas';
-
-// El orden solo importa al crear la hoja; después se lee por nombre de columna.
-const COLUMNAS = [
-  'fecha', 'nombre', 'correo', 'departamento', 'transferencia',
-  'contenidos_cpe', 'contenido_cpe_otro', 'practicas_avanzadas',
-  'personas_basico', 'personas_intermedio', 'personas_avanzado',
-  'trabajo_estudiantes', 'trabajo_estudiantes_otro', 'estudiantes_alcanzados',
-  'barreras', 'apoyo'
-];
-const REQUERIDOS = [
-  'nombre', 'correo', 'departamento', 'transferencia', 'contenidos_cpe',
-  'practicas_avanzadas', 'personas_basico', 'personas_intermedio',
-  'personas_avanzado', 'trabajo_estudiantes', 'estudiantes_alcanzados',
-  'barreras', 'apoyo'
-];
-const NUMERICOS = [
-  'transferencia', 'personas_basico', 'personas_intermedio',
-  'personas_avanzado', 'estudiantes_alcanzados'
-];
+const FIJAS = ['fecha', 'nombre', 'cedula'];
+const MAX_COLUMNAS = 200;
 const LARGO_MAXIMO = 1000;
 
 // Bloqueo del panel tras intentos fallidos de contraseña.
@@ -63,37 +50,47 @@ function configurarHoja() {
 function guardar_(p) {
   if (p.sitio_web) return { ok: true }; // campo trampa: solo lo llenan bots
 
-  const fila = {};
-  COLUMNAS.forEach(function (c) {
-    fila[c] = String(p[c] || '').trim().slice(0, LARGO_MAXIMO);
-  });
-  fila.correo = fila.correo.toLowerCase();
+  const nombre = String(p.nombre || '').trim().slice(0, 120);
+  const cedula = String(p.cedula || '').replace(/\D/g, '');
+  if (!nombre || !/^\d{5,12}$/.test(cedula)) return { ok: false, error: 'invalido' };
 
-  const incompleto = REQUERIDOS.some(function (c) { return fila[c] === ''; });
-  const numeroInvalido = NUMERICOS.some(function (c) { return !/^\d+$/.test(fila[c]); });
-  const correoInvalido = !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(fila.correo);
-  if (incompleto || numeroInvalido || correoInvalido) return { ok: false, error: 'invalido' };
+  const orden = String(p._orden || '').split(',')
+    .map(function (c) { return c.trim(); })
+    .filter(function (c) { return /^[a-z0-9_]{1,64}$/.test(c); })
+    .slice(0, MAX_COLUMNAS);
 
   const lock = LockService.getScriptLock();
   lock.waitLock(20000);
   try {
     const hoja = hoja_();
-    const cabecera = cabecera_(hoja);
-    const colCorreo = cabecera.indexOf('correo') + 1;
-    const ultima = hoja.getLastRow();
-    if (colCorreo > 0 && ultima > 1) {
-      const correos = hoja.getRange(2, colCorreo, ultima - 1, 1).getValues();
-      const repetido = correos.some(function (r) {
-        return String(r[0]).trim().toLowerCase() === fila.correo;
-      });
-      if (repetido) return { ok: false, error: 'duplicado' };
+    let cabecera = cabecera_(hoja);
+
+    // Columnas que aún no existen (incluidas las fijas, por si la hoja es de una versión anterior).
+    const nuevas = FIJAS.concat(orden).filter(function (c, i, todas) {
+      return todas.indexOf(c) === i && cabecera.indexOf(c) < 0;
+    });
+    if (nuevas.length && cabecera.length + nuevas.length <= MAX_COLUMNAS) {
+      hoja.getRange(1, cabecera.length + 1, 1, nuevas.length).setValues([nuevas]);
+      estiloCabecera_(hoja);
+      cabecera = cabecera.concat(nuevas);
     }
 
-    fila.fecha = new Date();
+    const colCedula = cabecera.indexOf('cedula') + 1;
+    const ultima = hoja.getLastRow();
+    if (colCedula > 0 && ultima > 1) {
+      const cedulas = hoja.getRange(2, colCedula, ultima - 1, 1).getValues();
+      if (cedulas.some(function (r) { return String(r[0]).replace(/\D/g, '') === cedula; })) {
+        return { ok: false, error: 'duplicado' };
+      }
+    }
+
     hoja.appendRow(cabecera.map(function (c) {
-      if (c === 'fecha') return fila.fecha;
-      if (NUMERICOS.indexOf(c) >= 0) return Number(fila[c]);
-      return textoSeguro_(fila[c] || '');
+      if (c === 'fecha') return new Date();
+      if (c === 'nombre') return textoSeguro_(nombre);
+      if (c === 'cedula') return cedula;
+      if (orden.indexOf(c) < 0) return '';
+      const v = String(p[c] || '').trim().slice(0, LARGO_MAXIMO);
+      return /^\d{1,9}$/.test(v) ? Number(v) : textoSeguro_(v);
     }));
     return { ok: true };
   } finally {
@@ -133,12 +130,18 @@ function hoja_() {
   let hoja = libro.getSheetByName(HOJA);
   if (!hoja) {
     hoja = libro.insertSheet(HOJA);
-    hoja.getRange(1, 1, 1, COLUMNAS.length).setValues([COLUMNAS])
-      .setFontWeight('bold').setBackground('#0C3545').setFontColor('#FFFFFF');
+    hoja.getRange(1, 1, 1, FIJAS.length).setValues([FIJAS]);
+    estiloCabecera_(hoja);
     hoja.setFrozenRows(1);
     hoja.getRange('A:A').setNumberFormat('yyyy-mm-dd hh:mm');
+    hoja.getRange('C:C').setNumberFormat('@'); // cédula como texto
   }
   return hoja;
+}
+
+function estiloCabecera_(hoja) {
+  hoja.getRange(1, 1, 1, hoja.getLastColumn())
+    .setFontWeight('bold').setBackground('#0C3545').setFontColor('#FFFFFF');
 }
 
 function cabecera_(hoja) {
