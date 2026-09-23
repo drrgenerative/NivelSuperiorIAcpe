@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Panel de seguimiento · Formación de formadores en IA</title>
+<meta name="theme-color" content="#0C3545">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%230C3545%22/%3E%3Cpath d=%22M9 16.5l4.5 4.5L23 11%22 fill=%22none%22 stroke=%22%23F9B91F%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/estilos.css">
+<link rel="stylesheet" href="assets/css/admin.css">
+</head>
+<body>
+
+<!-- Ingreso -->
+<main class="ingreso" id="ingreso">
+  <form class="ingreso__caja" id="ingresoForm">
+    <div class="franja" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+    <div class="ingreso__logos">
+      <img src="assets/img/logo-fundacion-shaia.png" alt="Fundación Shaia" class="marca__shaia">
+      <img src="assets/img/logo-tpa.png" alt="Tecnologías para Aprender" class="marca__tpa">
+    </div>
+    <h1>Panel de seguimiento</h1>
+    <p class="ingreso__sub">Formación de formadores en IA · respuestas del seguimiento a la transferencia.</p>
+    <label for="clave">Contraseña</label>
+    <input type="password" id="clave" autocomplete="current-password" required>
+    <div class="aviso aviso--error" id="ingresoError" hidden></div>
+    <button class="btn" type="submit" id="ingresoBtn">Entrar</button>
+    <p class="ingreso__demo" id="ingresoDemo" hidden>Modo de prueba: la contraseña es <strong>demo</strong>.</p>
+  </form>
+</main>
+
+<!-- Panel -->
+<div id="panel" hidden>
+  <header class="barra">
+    <div class="barra__interior">
+      <div class="barra__marca">
+        <img src="assets/img/logo-fundacion-shaia.png" alt="Fundación Shaia" class="barra__logo">
+        <div>
+          <div class="barra__titulo">Panel de seguimiento</div>
+          <div class="barra__sub">Formación de formadores en IA</div>
+        </div>
+      </div>
+      <div class="barra__acciones">
+        <button class="btn btn--secundario btn--chico" id="actualizarBtn" type="button">Actualizar</button>
+        <button class="btn btn--acento btn--chico" id="excelBtn" type="button">Descargar Excel</button>
+        <button class="btn btn--secundario btn--chico" id="salirBtn" type="button">Salir</button>
+      </div>
+    </div>
+    <div class="franja" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  </header>
+
+  <main class="panel">
+    <div class="aviso" id="demoBarra" hidden></div>
+
+    <div class="filtros" role="search">
+      <div class="filtro">
+        <label for="fDepto">Departamento</label>
+        <select id="fDepto"><option value="">Todos</option></select>
+      </div>
+      <div class="filtro">
+        <label for="fDesde">Desde</label>
+        <input type="date" id="fDesde">
+      </div>
+      <div class="filtro">
+        <label for="fHasta">Hasta</label>
+        <input type="date" id="fHasta">
+      </div>
+      <button class="enlace filtros__limpiar" id="limpiarBtn" type="button">Limpiar filtros</button>
+      <div class="filtros__cuenta" id="cuenta" aria-live="polite"></div>
+    </div>
+
+    <div class="pestanas" role="tablist">
+      <button role="tab" id="tabResumen" aria-controls="vistaResumen" aria-selected="true" type="button">Resumen</button>
+      <button role="tab" id="tabIndividual" aria-controls="vistaIndividual" aria-selected="false" type="button">Individual</button>
+    </div>
+
+    <section id="vistaResumen" role="tabpanel" aria-labelledby="tabResumen"></section>
+    <section id="vistaIndividual" role="tabpanel" aria-labelledby="tabIndividual" hidden></section>
+  </main>
+</div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/preguntas.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/admin.js"></script>
+</body>
+</html>

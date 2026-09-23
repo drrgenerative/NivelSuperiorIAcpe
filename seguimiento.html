@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Seguimiento · Formación de formadores en IA</title>
+<meta name="description" content="Seguimiento a la transferencia de la formación de formadores en IA · CPE, Fundación Shaia y Tecnologías para Aprender.">
+<meta name="theme-color" content="#0C3545">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 rx=%228%22 fill=%22%230C3545%22/%3E%3Cpath d=%22M9 16.5l4.5 4.5L23 11%22 fill=%22none%22 stroke=%22%23F9B91F%22 stroke-width=%223.5%22 stroke-linecap=%22round%22 stroke-linejoin=%22round%22/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/estilos.css">
+<link rel="stylesheet" href="assets/css/formulario.css">
+</head>
+<body>
+
+<div class="progreso" id="progreso">
+  <div class="progreso__interior">
+    <span class="progreso__titulo">Seguimiento a la transferencia</span>
+    <div class="progreso__pista" role="progressbar" aria-label="Preguntas completas" aria-valuemin="0" aria-valuemax="10" aria-valuenow="0">
+      <div class="progreso__relleno" id="progresoRelleno"></div>
+    </div>
+    <span class="progreso__texto" id="progresoTexto">0 de 10</span>
+  </div>
+</div>
+
+<header class="marca">
+  <div class="franja" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  <div class="marca__interior">
+    <img class="marca__shaia" src="assets/img/logo-fundacion-shaia.png" alt="Fundación Shaia" width="204" height="75">
+    <img class="marca__tpa" src="assets/img/logo-tpa.png" alt="Tecnologías para Aprender" width="776" height="250">
+  </div>
+</header>
+
+<main class="contenedor">
+  <section class="hero">
+    <span class="hero__kicker">Formación de formadores en IA · TPA</span>
+    <h1>Seguimiento a la transferencia</h1>
+    <p class="hero__lead">Para responder aproximadamente un mes después del taller.</p>
+    <div class="hero__metas">
+      <span class="hero__meta" id="metaTiempo">6 minutos</span>
+      <span class="hero__meta" id="metaPreguntas">10 preguntas · todas obligatorias</span>
+    </div>
+    <div class="hero__intro">
+      <h2>¿Qué pasó después del taller?</h2>
+      <p>Nos interesa conocer qué contenidos de CPE has utilizado, cómo has acompañado a directivos, docentes y estudiantes, qué ideas de la formación avanzada has llevado a la práctica y qué apoyo necesitas para continuar.</p>
+    </div>
+  </section>
+
+  <div class="aviso aviso-demo" id="avisoDemo" hidden></div>
+
+  <form id="formulario" novalidate>
+    <div id="preguntas"></div>
+
+    <div class="trampa" aria-hidden="true">
+      <label for="sitio_web">No completar</label>
+      <input id="sitio_web" name="sitio_web" tabindex="-1" autocomplete="off">
+    </div>
+
+    <div class="envio">
+      <div class="aviso aviso--error" id="aviso" role="alert" hidden></div>
+      <div class="envio__fila">
+        <p class="envio__nota">Revisa tus respuestas antes de enviar. Solo se admite un seguimiento por correo.</p>
+        <button class="btn btn--acento" id="enviarBtn" type="submit">Enviar seguimiento</button>
+      </div>
+    </div>
+  </form>
+
+  <section class="gracias" id="gracias" hidden tabindex="-1">
+    <div class="gracias__icono" id="graciasIcono"></div>
+    <h2>¡Seguimiento enviado!</h2>
+    <p>Gracias por contarnos cómo has llevado la formación a tu comunidad. Tus respuestas nos ayudan a planear el acompañamiento que viene.</p>
+    <div class="gracias__otra">
+      ¿Otra persona va a responder desde este equipo?
+      <button class="enlace" id="otraRespuesta" type="button">Abrir un formulario nuevo</button>
+    </div>
+  </section>
+</main>
+
+<footer class="pie">Convenio CPE / Fundación Shaia 2026 · Evita incluir nombres de estudiantes o información sensible.</footer>
+
+<script src="assets/js/config.js"></script>
+<script src="assets/js/util.js"></script>
+<script src="assets/js/preguntas.js"></script>
+<script src="assets/js/api.js"></script>
+<script src="assets/js/formulario.js"></script>
+</body>
+</html>
