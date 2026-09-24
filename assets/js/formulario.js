@@ -82,7 +82,20 @@
       case "multi": return multi(p);
       case "matriz": return matriz(p, false);
       case "matriz-numeros": return matriz(p, true);
+      case "consentimiento": return consentimiento(p);
     }
+  }
+
+  // Texto legal con enlaces + una sola opción "Sí, acepto" (obligatoria para enviar).
+  function consentimiento(p) {
+    const texto = crear("p", { class: "consentimiento__texto" }, p.texto.map(t => typeof t === "string" ? t
+      : crear("a", { href: t.url, target: t.externo ? "_blank" : null, rel: t.externo ? "noopener" : null }, t.texto)));
+    const opcion = crear("label", { class: "consentimiento__opcion" }, [
+      crear("input", { type: "radio", id: p.campo, name: p.campo, value: p.opcion, onchange: cambio }),
+      crear("span", { class: "radio", "aria-hidden": "true" }),
+      crear("span", {}, p.opcion)
+    ]);
+    return [texto, opcion];
   }
 
   function escala(p) {
@@ -139,7 +152,12 @@
 
     let ninguno = null;
     const casillas = [];
+    let grupo = null;
     p.filas.forEach(f => {
+      if (f.grupo && f.grupo !== grupo) {
+        grupo = f.grupo;
+        caja.append(crear("div", { class: "matriz__grupo" }, crear("span", {}, grupo)));
+      }
       const celdas = p.columnas.map(c => {
         if (numeros) {
           return crear("label", { class: "celda celda--num" }, [
@@ -194,6 +212,7 @@
           });
           if (p.ninguno) d[campoNinguno(p)] = $("#" + campoNinguno(p)).checked ? "Sí" : "";
           break;
+        case "consentimiento": d[p.campo] = $("#" + p.campo).checked ? p.opcion : ""; break;
         default: d[p.campo] = valor(p.campo);
       }
     });
@@ -217,6 +236,7 @@
       case "matriz-numeros":
         return p.filas.every(f => p.columnas.every(c => esEntero(d[campoCelda(p, f, c)], p.max)))
           ? "" : "Registra un número entero en cada casilla (0 si no aplica).";
+      case "consentimiento": return d[p.campo] ? "" : `Para enviar la encuesta debes marcar «${p.opcion}».`;
       default: return d[p.campo] ? "" : OBLIGATORIA;
     }
   }
@@ -318,7 +338,7 @@
   // ---------- Inicio ----------
 
   $("#metaTiempo").prepend(crear("span", { html: ICONOS.reloj }));
-  $("#metaPreguntas").replaceChildren(crear("span", { html: ICONOS.lista }), `${RESPONDIBLES.length} preguntas · todas obligatorias`);
+  $("#metaPreguntas").replaceChildren(crear("span", { html: ICONOS.lista }), `${RESPONDIBLES.filter(p => p.tipo !== "consentimiento").length} preguntas · todas obligatorias`);
   $("#progreso [role=progressbar]").setAttribute("aria-valuemax", RESPONDIBLES.length);
   $("#graciasIcono").innerHTML = ICONOS.check;
   if (PADLET) {

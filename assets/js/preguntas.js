@@ -18,8 +18,8 @@ const PREGUNTAS = [
 
   {
     n: 3, seccion: "Aplicación", tipo: "escala", campo: "transferencia", corto: "Aplicación de lo aprendido (1-5)",
-    titulo: "Desde el taller, ¿cuánto has logrado aplicar lo aprendido?",
-    anclas: ["Todavía no lo he aplicado", "Lo he incorporado en mi trabajo"]
+    titulo: "Desde el taller, ¿cuánto has logrado aplicar lo aprendido en tu trabajo?",
+    anclas: ["Todavía no lo he aplicado", "Lo he incorporado frecuentemente"],
   },
 
   {
@@ -28,16 +28,16 @@ const PREGUNTAS = [
     ayuda: "En cada contenido, marca con quién lo has utilizado. Puedes marcar varias columnas por fila.",
     columnas: ROLES,
     filas: [
-      { id: "maquinas", texto: "Máquinas que aprenden" },
-      { id: "etica_uso", texto: "IA ética y uso responsable" },
-      { id: "detras_chat", texto: "Detrás del chat" },
-      { id: "proyecto_final", texto: "Proyecto final" },
-      { id: "prompts", texto: "Ingeniería de prompts pedagógicos" },
-      { id: "analisis_critico", texto: "Análisis crítico y ética de la IA" },
-      { id: "curriculo", texto: "IA aplicada al currículo" },
-      { id: "arquitecturas", texto: "Arquitecturas de IA contextualizada" },
-      { id: "multimodalidad", texto: "Multimodalidad e inclusión educativa" },
-      { id: "gobernanza", texto: "Gobernanza, liderazgo e integración curricular" }
+      { id: "maquinas", texto: "Máquinas que aprenden", grupo: "Nivel básico" },
+      { id: "etica_uso", texto: "IA ética y uso responsable", grupo: "Nivel básico" },
+      { id: "detras_chat", texto: "Detrás del chat", grupo: "Nivel básico" },
+      { id: "proyecto_final", texto: "Proyecto final", grupo: "Nivel básico" },
+      { id: "prompts", texto: "Ingeniería de prompts pedagógicos", grupo: "Nivel intermedio" },
+      { id: "analisis_critico", texto: "Análisis crítico y ética de la IA", grupo: "Nivel intermedio" },
+      { id: "curriculo", texto: "IA aplicada al currículo", grupo: "Nivel intermedio" },
+      { id: "arquitecturas", texto: "Arquitecturas de IA contextualizada", grupo: "Nivel avanzado" },
+      { id: "multimodalidad", texto: "Multimodalidad e inclusión educativa", grupo: "Nivel avanzado" },
+      { id: "gobernanza", texto: "Gobernanza, liderazgo e integración curricular", grupo: "Nivel avanzado" }
     ],
     ninguno: "Todavía no he utilizado ninguno de estos contenidos"
   },
@@ -99,10 +99,30 @@ const PREGUNTAS = [
     n: 9, tipo: "parrafo", campo: "apoyo", corto: "Apoyo que ayudaría", max: 1000,
     titulo: "¿Qué apoyos te ayudarían a avanzar en el acompañamiento de tu comunidad para que sea más competente en el uso de la IA?"
   },
+  {
+    n: 10, tipo: "parrafo", campo: "propuestas_tpa", corto: "Propuestas para TPA", max: 1000,
+    titulo: "¿Qué crees que podríamos implementar desde Tecnologías para Aprender para responder a las necesidades de las comunidades educativas locales?"
+  },
+
+  // Obligatoria para enviar. Se guarda como constancia ("Sí, acepto") con la fecha del envío.
+  {
+    n: 11, seccion: "Tratamiento de datos", tipo: "consentimiento", campo: "autorizacion_datos", corto: "Autorización de tratamiento de datos",
+    titulo: "Autorización para el Tratamiento de Datos",
+    texto: [
+      "Al enviar esta encuesta, usted está aceptando la política de tratamiento de datos de Computadores para Educar y autoriza la recolección y el tratamiento de sus datos personales, incluyendo la información proporcionada en este formulario, para los fines allí establecidos. Si desea consultarla, ingrese a este link: ",
+      { url: "https://www.computadoresparaeducar.gov.co/publicaciones/66/politicas-y-condiciones-de-uso/", texto: "computadoresparaeducar.gov.co/publicaciones/66/politicas-y-condiciones-de-uso", externo: true },
+      ". Cualquier duda, comuníquese con la línea gratuita ",
+      { url: "tel:018000919275", texto: "01-8000-919-275" },
+      " o escríbanos a ",
+      { url: "mailto:info@cpe.gov.co", texto: "info@cpe.gov.co" },
+      "."
+    ],
+    opcion: "Sí, acepto"
+  },
 
   // Tarjeta informativa: no es pregunta, no es obligatoria y no se guarda.
   {
-    n: 10, seccion: "Comparte tu experiencia", tipo: "enlace",
+    n: 12, seccion: "Comparte tu experiencia", tipo: "enlace",
     titulo: "Comparte tus experiencias en el Padlet",
     texto: "Te invitamos a compartir en el Padlet lo que has hecho después del taller: tus ejemplos, recursos o fotos de las actividades. Así otros formadores pueden conocer tu experiencia y aprender de ella.",
     url: "https://padlet.com/nando24/taller-ia-nivel-superior-formador-de-formadores-mri6rkz61qiy2cb3",

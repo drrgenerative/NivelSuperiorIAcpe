@@ -64,6 +64,7 @@ const API = (() => {
           if (p.otro) f[p.otro.campo] = f[p.campo].includes(p.otro.opcion) ? azar(["Rotación de docentes", "Carga administrativa", "Falta de energía eléctrica"]) : "";
         }
         else if (p.tipo === "parrafo") f[p.campo] = azar(apoyos);
+        else if (p.tipo === "consentimiento") f[p.campo] = p.opcion;
         else if (p.tipo === "matriz-numeros") {
           p.filas.forEach((fi, k) => p.columnas.forEach(c => {
             const tope = { directivos: 6, docentes: 30, estudiantes: 120 }[c.id] || 10;

@@ -265,3 +265,8 @@ body { font-variant-numeric: lining-nums tabular-nums; }
   .tabla { font-size: .8rem; }
   .tabla th, .tabla td { padding: 7px 6px; }
 }
+
+.tabla .tabla__grupo th {
+  padding: 12px 10px 6px; font-size: .74rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--navy); background: var(--card); text-align: left;
+}

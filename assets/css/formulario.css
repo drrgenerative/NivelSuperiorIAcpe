@@ -201,6 +201,14 @@ input:focus-visible + .casilla { box-shadow: var(--focus); }
 }
 .ninguno:has(input:checked) { border-style: solid; border-color: var(--acento); background: color-mix(in srgb, var(--acento) 8%, white); font-weight: 600; }
 
+/* Subtítulo que agrupa filas de una matriz (p. ej. "Nivel básico") */
+.matriz__grupo { border-top: 1px solid var(--border); padding: 10px 14px 6px; background: var(--card); }
+.matriz__grupo span {
+  display: inline-block; padding: 3px 12px; border-radius: 99px;
+  background: color-mix(in srgb, var(--acento) 14%, white); color: var(--navy);
+  font-size: .76rem; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+}
+
 /* En celular cada fila se vuelve una tarjeta con los roles como botones. */
 @media (max-width: 640px) {
   .matriz { border: none; border-radius: 0; overflow: visible; display: grid; gap: 10px; }
@@ -210,6 +218,7 @@ input:focus-visible + .casilla { box-shadow: var(--focus); }
     border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: var(--card);
   }
   .matriz__etq { grid-column: 1 / -1; padding: 0 0 4px; font-weight: 600; }
+  .matriz__grupo { border: none; padding: 8px 0 0; background: none; }
   .celda {
     flex-direction: column; gap: 4px; padding: 8px 4px; min-width: 0;
     border: 1.5px solid var(--border-2); border-radius: 9px;
@@ -247,3 +256,23 @@ input:focus-visible + .casilla { box-shadow: var(--focus); }
   background: color-mix(in srgb, var(--yellow) 16%, white); border: 1px solid color-mix(in srgb, var(--yellow) 50%, white);
 }
 .gracias__padlet p { margin: 0; font-size: .95rem; color: var(--ink-2); }
+
+/* Autorización de tratamiento de datos */
+.consentimiento__texto { font-size: .9rem; color: var(--ink-2); line-height: 1.6; }
+.consentimiento__texto a { color: var(--cyan-ink); font-weight: 700; overflow-wrap: anywhere; }
+.consentimiento__opcion {
+  display: inline-flex; align-items: center; gap: 10px; margin-top: 14px; position: relative;
+  padding: 11px 18px 11px 14px; border: 1.5px solid var(--border-2); border-radius: 10px;
+  font-weight: 700; cursor: pointer; transition: all .12s;
+}
+.consentimiento__opcion input { position: absolute; opacity: 0; width: 1px; height: 1px; pointer-events: none; }
+.radio {
+  flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border-2);
+  display: grid; place-items: center; background: var(--card); transition: all .12s;
+}
+.radio::after { content: ""; width: 10px; height: 10px; border-radius: 50%; background: transparent; transition: background .12s; }
+.consentimiento__opcion:hover { border-color: var(--acento); }
+.consentimiento__opcion:has(input:checked) { border-color: var(--acento); background: color-mix(in srgb, var(--acento) 8%, white); }
+input:checked + .radio { border-color: var(--acento); }
+input:checked + .radio::after { background: var(--acento); }
+input:focus-visible + .radio { box-shadow: var(--focus); }

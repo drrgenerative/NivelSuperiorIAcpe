@@ -301,6 +301,20 @@
     ]);
   }
 
+  // Inserta una fila de subtítulo (p. ej. "Nivel básico") cada vez que cambia el grupo.
+  function conGrupos(p, filasTr, columnas) {
+    const salida = [];
+    let grupo = null;
+    p.filas.forEach((fi, i) => {
+      if (fi.grupo && fi.grupo !== grupo) {
+        grupo = fi.grupo;
+        salida.push(crear("tr", { class: "tabla__grupo" }, crear("th", { colspan: columnas, scope: "colgroup" }, grupo)));
+      }
+      salida.push(filasTr[i]);
+    });
+    return salida;
+  }
+
   // Tabla de calor: el fondo se intensifica con el porcentaje; el número siempre está escrito.
   function celdaCalor(v, n) {
     const pct = n ? (v / n) * 100 : 0;
@@ -312,9 +326,9 @@
     return [
       crear("div", { class: "tabla-scroll" }, crear("table", { class: "tabla" }, [
         crear("thead", {}, crear("tr", {}, [crear("th", { scope: "col" }, "Opción"), ...p.columnas.map(c => crear("th", { scope: "col" }, c.texto)), crear("th", { scope: "col" }, "Algún rol")])),
-        crear("tbody", {}, conteo.filas.map(f => crear("tr", {}, [
+        crear("tbody", {}, conGrupos(p, conteo.filas.map(f => crear("tr", {}, [
           crear("th", { scope: "row" }, f.texto), ...f.porCol.map(v => celdaCalor(v, n)), celdaCalor(f.alguna, n)
-        ])))
+        ])), p.columnas.length + 2))
       ])),
       p.ninguno && crear("p", { class: "extra" }, [`${p.ninguno}: `, crear("strong", {}, fmtNum(conteo.ninguno)), ` (${fmtPct(n ? conteo.ninguno / n * 100 : 0)})`])
     ];
@@ -437,7 +451,7 @@
         if (f[campoNinguno(p)]) return crear("p", { class: "cita" }, p.ninguno);
         return crear("div", { class: "tabla-scroll" }, crear("table", { class: "tabla tabla--marcas" }, [
           crear("thead", {}, crear("tr", {}, [crear("th", { scope: "col" }, ""), ...p.columnas.map(c => crear("th", { scope: "col" }, c.texto))])),
-          crear("tbody", {}, p.filas.map(fi => {
+          crear("tbody", {}, conGrupos(p, p.filas.map(fi => {
             const l = f._listas[campoFila(p, fi)];
             return crear("tr", { class: l.length ? "si" : null }, [
               crear("th", { scope: "row" }, fi.texto),
@@ -445,7 +459,7 @@
                 ? crear("td", { class: "marca", "aria-label": "Sí", html: ICONOS.check })
                 : crear("td", { class: "marca marca--no", "aria-label": "No" }, "·"))
             ]);
-          }))
+          }), p.columnas.length + 1))
         ]));
       }
       case "matriz-numeros": {
@@ -520,7 +534,7 @@
     ];
     const filasPct = [];
     RESPONDIBLES.filter(p => p.n > 2).forEach(p => {
-      if (p.tipo === "parrafo") return;
+      if (p.tipo === "parrafo" || p.tipo === "consentimiento") return;
       aoa.push([`${p.n}. ${p.titulo}`]);
       if (p.tipo === "escala") {
         aoa.push([`Valor (1 = ${p.anclas[0]}; 5 = ${p.anclas[1]})`, "Respuestas", "% de participantes"]);
@@ -531,7 +545,12 @@
       } else if (p.tipo === "matriz") {
         const c = conteoMatriz(p, filas);
         aoa.push(["Opción (personas que marcaron)", ...p.columnas.map(x => x.texto), "Algún rol"]);
-        c.filas.forEach(f => aoa.push([f.texto, ...f.porCol, f.alguna]));
+        let grupo = null;
+        c.filas.forEach((f, i) => {
+          const g = p.filas[i].grupo;
+          if (g && g !== grupo) { grupo = g; aoa.push([g.toUpperCase()]); }
+          aoa.push([f.texto, ...f.porCol, f.alguna]);
+        });
         aoa.push([p.ninguno, c.ninguno]);
       } else if (p.tipo === "matriz-numeros") {
         const s = sumasPersonas(filas);

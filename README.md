@@ -9,7 +9,7 @@ Sitio estático para GitHub Pages; las respuestas se guardan en una hoja de Goog
 | `admin.html` | Panel: resumen, respuestas individuales y botón **Descargar Excel** |
 | `assets/js/preguntas.js` | **Única** definición de preguntas y opciones (formulario, panel y Excel salen de aquí) |
 | `assets/js/config.js` | URL del backend (`SCRIPT_URL`) |
-| `apps-script/Code.gs` | Backend: guarda respuestas, bloquea correos duplicados y entrega datos al panel con contraseña |
+| `apps-script/Code.gs` | Backend: guarda respuestas, bloquea cédulas duplicadas, crea solo las columnas nuevas y entrega datos al panel con contraseña |
 | `MEMORIA.md` | Decisiones, pendientes y registro de cambios del proyecto |
 
 **Modo de prueba:** mientras `SCRIPT_URL` esté vacío, todo funciona pero los datos quedan solo en el navegador. La contraseña del panel es `demo` y hay un botón para cargar respuestas de ejemplo.
@@ -63,7 +63,7 @@ Edita `ADMIN_PASSWORD` en *Propiedades de la secuencia de comandos*. No hace fal
 
 ## Cómo funciona
 
-- **Duplicados:** el backend rechaza un segundo envío con el mismo correo, sin distinguir mayúsculas. La persona ve un aviso claro.
+- **Duplicados:** el backend rechaza un segundo envío con el mismo número de cédula. La persona ve un aviso claro.
 - **Seguridad del panel:** la contraseña se valida en Apps Script, nunca en el HTML. Tras 10 intentos fallidos, el panel se bloquea 15 minutos. La hoja de Google sigue siendo privada de la cuenta dueña.
-- **Excel:** exporta las respuestas **con los filtros activos** (departamento y fechas) en dos hojas: *Respuestas* (una fila por persona) y *Resumen* (indicadores y conteos por pregunta).
-- **Editar preguntas u opciones:** cambia `assets/js/preguntas.js`. Si agregas, quitas o renombras un `campo`, actualiza también `COLUMNAS`/`REQUERIDOS` en `Code.gs`, agrega la columna en la hoja y publica una nueva versión.
+- **Excel:** exporta las respuestas **con el filtro de fechas activo** en dos hojas: *Respuestas* (una fila por persona; en las matrices, una columna por fila con los roles marcados, p. ej. "Directivos; Docentes") y *Resumen* (indicadores y tablas por pregunta).
+- **Editar preguntas u opciones:** cambia solo `assets/js/preguntas.js`. El backend agrega a la hoja las columnas nuevas en el siguiente envío, así que **no hace falta tocar `Code.gs`**. Si renombras un `campo` o el `id` de una fila, se crea una columna nueva y la vieja queda con los datos anteriores.
