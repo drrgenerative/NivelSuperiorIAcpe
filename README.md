@@ -10,4 +10,3 @@ Sitio estático para GitHub Pages; las respuestas se guardan en una hoja de Goog
 | `assets/js/preguntas.js` | **Única** definición de preguntas y opciones (formulario, panel y Excel salen de aquí) |
 | `assets/js/config.js` | URL del backend (`SCRIPT_URL`) |
 | `apps-script/Code.gs` | Backend: guarda respuestas, bloquea cédulas duplicadas, crea solo las columnas nuevas y entrega datos al panel con contraseña |
-| `MEMORIA.md` | Decisiones, pendientes y registro de cambios del proyecto |
